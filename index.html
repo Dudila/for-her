@@ -32,13 +32,27 @@
   @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
   @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,40px)} }
 
-  /* Subtle camera-lens vignette */
+  /* Camera-lens vignette (only visible while crawling) */
   .vignette {
     position: absolute; inset: 0;
     background: radial-gradient(ellipse at center,
-      rgba(0,0,0,0) 50%, rgba(60,30,50,0.18) 90%, rgba(40,20,30,0.35) 100%);
+      rgba(0,0,0,0) 45%, rgba(60,30,50,0.20) 88%, rgba(40,20,30,0.45) 100%);
     pointer-events: none; z-index: 8;
+    opacity: 0; transition: opacity 0.6s ease;
   }
+  .vignette.show { opacity: 1; }
+
+  /* Subtle "lens" reflection arcs (decorative, only on crawl) */
+  .lens-arc {
+    position: absolute; pointer-events: none;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.22);
+    opacity: 0; transition: opacity 0.6s ease;
+    z-index: 7;
+  }
+  .lens-arc.a1 { width: 140vmin; height: 140vmin; top: -20vmin; left: -20vmin; }
+  .lens-arc.a2 { width: 120vmin; height: 120vmin; top: -10vmin; left: -10vmin; border-color: rgba(255,255,255,0.12); }
+  .lens-arc.show { opacity: 1; }
 
   /* Greeting */
   .greeting {
@@ -81,53 +95,131 @@
     100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
   }
 
-  /* Ladybug */
+  /* ============ LADYBUG ============ */
   .ladybug {
     position: absolute;
-    width: 56px; height: 56px;
+    width: 80px; height: 80px;
     pointer-events: none; z-index: 10;
     transform-origin: center; will-change: transform;
-    opacity: 0; transition: opacity 0.3s, filter 0.4s;
+    opacity: 0; transition: opacity 0.3s;
     top: 0; left: 0;
   }
   .ladybug.visible { opacity: 1; }
-  .ladybug.on-glass {
-    filter: drop-shadow(0 0 4px rgba(255,255,255,0.6))
-            drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+  .ladybug-body {
+    width: 100%; height: 100%;
+    overflow: visible;
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .ladybug-body { width: 100%; height: 100%; transform-origin: center; }
+  /* Big and "close to camera" while crawling */
+  .ladybug.crawling .ladybug-body { transform: scale(1.65); }
 
-  .wing { transform-origin: 28px 28px; }
+  /* Wings flutter while flying */
+  .wing { transform-origin: 28px 28px; transform-box: fill-box; }
   .ladybug.flying .wing { animation: flutter 0.07s ease-in-out infinite alternate; }
-  .ladybug.crawling .wing { transform: scaleX(0.6); opacity: 0.3; }
+  .ladybug.crawling .wing { opacity: 0; transition: opacity 0.3s; }
   @keyframes flutter {
     0% { transform: rotateY(0deg) scaleX(1); }
     100% { transform: rotateY(70deg) scaleX(0.5); }
   }
 
-  /* Wink eyelid (right eye) */
+  /* Body sway while crawling (rocks shoulders side to side) */
+  .body-group {
+    transform-box: fill-box;
+    transform-origin: 30px 50px;
+  }
+  .ladybug.crawling .body-group {
+    animation: bodySway 0.55s ease-in-out infinite alternate;
+  }
+  @keyframes bodySway {
+    0% { transform: rotate(-2.5deg) translateY(0); }
+    100% { transform: rotate(2.5deg) translateY(-0.6px); }
+  }
+
+  /* Glass shadow underneath (only during crawl) */
+  .glass-shadow {
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .ladybug.crawling .glass-shadow { opacity: 1; }
+
+  /* Shell glossy shine — only visible during crawl (close-up) */
+  .shine { opacity: 0; transition: opacity 0.5s; }
+  .ladybug.crawling .shine { opacity: 1; }
+
+  /* Legs animation — tripod gait */
+  .leg {
+    transform-box: fill-box;
+    transform-origin: 100% 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .ladybug.crawling .leg { opacity: 1; }
+  .ladybug.crawling .leg.a {
+    animation: legA 0.55s ease-in-out infinite;
+  }
+  .ladybug.crawling .leg.b {
+    animation: legB 0.55s ease-in-out infinite;
+  }
+  @keyframes legA {
+    0%, 100% { transform: rotate(0deg) translate(0, 0); }
+    50%      { transform: rotate(-12deg) translate(0.5px, -2px); }
+  }
+  @keyframes legB {
+    0%, 100% { transform: rotate(-12deg) translate(0.5px, -2px); }
+    50%      { transform: rotate(0deg) translate(0, 0); }
+  }
+  /* Right side legs use opposite origin */
+  .leg.right { transform-origin: 0% 50%; }
+  .ladybug.crawling .leg.right.a {
+    animation: legArightSide 0.55s ease-in-out infinite;
+  }
+  .ladybug.crawling .leg.right.b {
+    animation: legBrightSide 0.55s ease-in-out infinite;
+  }
+  @keyframes legArightSide {
+    0%, 100% { transform: rotate(0deg) translate(0, 0); }
+    50%      { transform: rotate(12deg) translate(-0.5px, -2px); }
+  }
+  @keyframes legBrightSide {
+    0%, 100% { transform: rotate(12deg) translate(-0.5px, -2px); }
+    50%      { transform: rotate(0deg) translate(0, 0); }
+  }
+
+  /* Antennae twitch */
+  .antenna { transform-box: fill-box; transform-origin: 50% 100%; }
+  .ladybug.crawling .antenna {
+    animation: antennaTwitch 1.8s ease-in-out infinite;
+  }
+  @keyframes antennaTwitch {
+    0%, 100% { transform: rotate(0deg); }
+    40%      { transform: rotate(8deg); }
+    60%      { transform: rotate(-6deg); }
+  }
+
+  /* Wink eyelid */
   .eyelid {
-    transform-origin: 32px 13px;
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
     transform: scaleY(0);
-    transition: transform 0.15s ease-in-out;
+    transition: transform 0.18s ease-in-out;
   }
   .ladybug.winking .eyelid { transform: scaleY(1); }
 
   /* Tiny heart (kiss) */
   .kiss-heart {
     position: absolute;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     pointer-events: none;
     z-index: 11;
     opacity: 0;
   }
-  .kiss-heart.fly {
-    animation: kissFly 1.4s ease-out forwards;
-  }
+  .kiss-heart.fly { animation: kissFly 1.5s ease-out forwards; }
   @keyframes kissFly {
     0% { opacity: 0; transform: translate(-50%, 0) scale(0.4); }
-    20% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
-    100% { opacity: 0; transform: translate(-50%, -90px) scale(0.7); }
+    20% { opacity: 1; transform: translate(-50%, -10px) scale(1.4); }
+    100% { opacity: 0; transform: translate(-50%, -110px) scale(0.7); }
   }
 
   /* Wish card */
@@ -152,22 +244,10 @@
     font-size: 0.75rem; margin-bottom: 12px; letter-spacing: 1px;
   }
   .wish-card .wish-text {
-    font-size: 1.1rem; line-height: 1.55; color: #5a3a4a; font-style: italic;
+    font-size: 1.15rem; line-height: 1.55; color: #5a3a4a; font-style: italic;
   }
   .wish-card .countdown {
     margin-top: 14px; font-size: 0.75rem; color: #b08090; opacity: 0.7;
-  }
-
-  /* Floating hearts on click */
-  .heart {
-    position: absolute; font-size: 1.5rem;
-    pointer-events: none; z-index: 15;
-    animation: floatUp 1.6s ease-out forwards;
-  }
-  @keyframes floatUp {
-    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
-    20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
-    100% { transform: translate(calc(-50% + var(--dx, 0)), -150px) scale(0.7); opacity: 0; }
   }
 
   /* Calendar */
@@ -214,7 +294,7 @@
     cursor: pointer; font-size: 0.95rem;
   }
 
-  /* Full-screen overlays (blocked / locked / done) */
+  /* Full-screen overlays */
   .overlay {
     position: fixed; inset: 0; z-index: 200;
     background: linear-gradient(160deg, #ffe4ec 0%, #fcb6c8 50%, #c794b8 100%);
@@ -227,7 +307,7 @@
   .overlay h2 { font-size: 1.6rem; color: #6b3550; font-weight: normal; font-style: italic; margin-bottom: 12px; }
   .overlay p { font-size: 1rem; color: #8b5570; max-width: 400px; line-height: 1.5; }
 
-  /* Floating "good day" toast */
+  /* Toast */
   .toast {
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
@@ -254,11 +334,15 @@
   <div class="blob b1"></div>
   <div class="blob b2"></div>
   <div class="blob b3"></div>
-  <div class="vignette"></div>
+
+  <!-- Lens reflections only when crawling -->
+  <div class="lens-arc a1" id="lensA1"></div>
+  <div class="lens-arc a2" id="lensA2"></div>
+  <div class="vignette" id="vignette"></div>
 
   <div class="greeting" id="greeting">
-    <h1 id="greetTitle">Доброе утро, Вика ✨</h1>
-    <p id="greetSub">наведи на ладошку — у меня кое-что для тебя 🐞</p>
+    <h1 id="greetTitle">Доброе утро, Вика</h1>
+    <p id="greetSub">наведи на ладошку 🐞</p>
   </div>
 
   <div class="palm-area" id="palm">
@@ -287,33 +371,90 @@
     </svg>
   </div>
 
+  <!-- ============ LADYBUG SVG ============ -->
   <div class="ladybug" id="ladybug">
-    <svg class="ladybug-body" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="30" cy="52" rx="18" ry="3" fill="rgba(0,0,0,0.15)"/>
-      <ellipse cx="30" cy="32" rx="22" ry="20" fill="#d63031" stroke="#2d3436" stroke-width="1.5"/>
-      <line x1="30" y1="14" x2="30" y2="50" stroke="#2d3436" stroke-width="1.5"/>
-      <circle cx="20" cy="24" r="3" fill="#2d3436"/>
-      <circle cx="40" cy="24" r="3" fill="#2d3436"/>
-      <circle cx="18" cy="36" r="2.5" fill="#2d3436"/>
-      <circle cx="42" cy="36" r="2.5" fill="#2d3436"/>
-      <circle cx="24" cy="44" r="2.5" fill="#2d3436"/>
-      <circle cx="36" cy="44" r="2.5" fill="#2d3436"/>
-      <ellipse cx="30" cy="14" rx="10" ry="8" fill="#2d3436"/>
-      <!-- left eye -->
-      <circle cx="26" cy="13" r="1.8" fill="white"/>
-      <circle cx="26" cy="13" r="0.9" fill="#2d3436"/>
-      <!-- right eye + eyelid for wink -->
-      <circle cx="34" cy="13" r="1.8" fill="white"/>
-      <circle cx="34" cy="13" r="0.9" fill="#2d3436"/>
-      <ellipse class="eyelid" cx="34" cy="13" rx="2.2" ry="2" fill="#2d3436"/>
-      <!-- antennae -->
-      <path d="M 26 8 Q 22 4, 20 2" stroke="#2d3436" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <path d="M 34 8 Q 38 4, 40 2" stroke="#2d3436" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <circle cx="20" cy="2" r="1.2" fill="#2d3436"/>
-      <circle cx="40" cy="2" r="1.2" fill="#2d3436"/>
-      <!-- wings (translucent) -->
-      <ellipse class="wing left" cx="22" cy="28" rx="14" ry="16" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
-      <ellipse class="wing right" cx="38" cy="28" rx="14" ry="16" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    <svg class="ladybug-body" viewBox="-5 -5 70 75" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadowBlur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.4"/>
+        </filter>
+        <radialGradient id="shellGrad" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#ee5050"/>
+          <stop offset="60%" stop-color="#d63031"/>
+          <stop offset="100%" stop-color="#a02020"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Glass shadow under body — stays put while body sways -->
+      <ellipse class="glass-shadow" cx="30" cy="58" rx="24" ry="4.5"
+               fill="rgba(20,10,15,0.40)" filter="url(#shadowBlur)"/>
+
+      <!-- Body group: sways during crawl -->
+      <g class="body-group">
+
+        <!-- LEGS (drawn behind body) -->
+        <!-- Left side -->
+        <path class="leg a"        d="M 13 26 L 0 22"  stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path class="leg b"        d="M 11 36 L -3 38" stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path class="leg a"        d="M 14 46 L 1 52"  stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- Right side -->
+        <path class="leg right b"  d="M 47 26 L 60 22"  stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path class="leg right a"  d="M 49 36 L 63 38"  stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path class="leg right b"  d="M 46 46 L 59 52"  stroke="#1a1d1f" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+        <!-- Body shell -->
+        <ellipse class="shell" cx="30" cy="32" rx="22" ry="20"
+                 fill="url(#shellGrad)" stroke="#2d3436" stroke-width="1.5"/>
+
+        <!-- Center wing-cover line -->
+        <line x1="30" y1="14" x2="30" y2="50" stroke="#2d3436" stroke-width="1.5"/>
+
+        <!-- Spots -->
+        <circle cx="20" cy="24" r="3"   fill="#181a1c"/>
+        <circle cx="40" cy="24" r="3"   fill="#181a1c"/>
+        <circle cx="18" cy="36" r="2.5" fill="#181a1c"/>
+        <circle cx="42" cy="36" r="2.5" fill="#181a1c"/>
+        <circle cx="24" cy="44" r="2.5" fill="#181a1c"/>
+        <circle cx="36" cy="44" r="2.5" fill="#181a1c"/>
+
+        <!-- Glossy shine on the dome (only visible during crawl/close-up) -->
+        <g class="shine">
+          <ellipse cx="22" cy="22" rx="9" ry="5" fill="white" opacity="0.20"
+                   transform="rotate(-30 22 22)"/>
+          <ellipse cx="20" cy="20" rx="3.5" ry="1.6" fill="white" opacity="0.55"
+                   transform="rotate(-30 20 20)"/>
+        </g>
+
+        <!-- Head -->
+        <ellipse cx="30" cy="14" rx="10" ry="8" fill="#2d3436"/>
+
+        <!-- Left eye -->
+        <circle cx="26" cy="13" r="1.8" fill="white"/>
+        <circle cx="26" cy="13" r="0.9" fill="#2d3436"/>
+
+        <!-- Right eye + wink eyelid -->
+        <circle cx="34" cy="13" r="1.8" fill="white"/>
+        <circle cx="34" cy="13" r="0.9" fill="#2d3436"/>
+        <ellipse class="eyelid" cx="34" cy="13" rx="2.3" ry="2.1" fill="#2d3436"/>
+
+        <!-- Antennae -->
+        <g class="antenna">
+          <path d="M 26 8 Q 22 4, 20 2" stroke="#2d3436" stroke-width="1.2"
+                fill="none" stroke-linecap="round"/>
+          <circle cx="20" cy="2" r="1.3" fill="#2d3436"/>
+        </g>
+        <g class="antenna">
+          <path d="M 34 8 Q 38 4, 40 2" stroke="#2d3436" stroke-width="1.2"
+                fill="none" stroke-linecap="round"/>
+          <circle cx="40" cy="2" r="1.3" fill="#2d3436"/>
+        </g>
+
+        <!-- Wings (only visible while flying) -->
+        <ellipse class="wing left"  cx="22" cy="28" rx="14" ry="16"
+                 fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+        <ellipse class="wing right" cx="38" cy="28" rx="14" ry="16"
+                 fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+      </g>
     </svg>
   </div>
 
@@ -337,7 +478,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- Overlays -->
   <div class="overlay" id="blockedOverlay">
     <div class="icon">🌷</div>
     <h2>Эта страничка не для тебя</h2>
@@ -353,29 +493,29 @@
   <div class="overlay" id="doneOverlay">
     <div class="icon">🌙</div>
     <h2>На сегодня всё, Вика</h2>
-    <p id="doneSub">Сегодняшнее уже прочитано. Возвращайся завтра утром — буду тебя ждать ✨</p>
+    <p>Сегодняшнее уже прочитано. Возвращайся завтра утром — буду тебя ждать ✨</p>
     <button class="cal-close" id="doneCal" style="margin-top:20px;">📖 посмотреть прошлые</button>
   </div>
 
 <script>
 (() => {
   // ============ CONFIG ============
-  const SECRET_KEY = 'vika-7k3m9p2x';                // URL ?k=... must match
-  const NTFY_TOPIC = 'vika-mornings-9k3m7p2x4q8w5t'; // ntfy.sh topic
-  const WISH_DURATION_MS = 10000;                    // wish auto-close timer
+  const SECRET_KEY = 'vika-7k3m9p2x';
+  const NTFY_TOPIC = 'vika-mornings-9k3m7p2x4q8w5t';
+  const WISH_DURATION_MS = 10000;
 
-  // ============ 10 WISHES (warm, friendly, not intimate) ============
+  // ============ 10 WISHES — short, simple, with soul ============
   const WISHES = [
-    "Доброе утро, Вика. Пусть сегодняшний день начнётся с чего-то приятного — любимый кофе, вкусный завтрак, или просто тёплый солнечный луч в окне. Хорошего дня. 🌸",
-    "Привет, Вика. Знаешь, ты как-то незаметно делаешь людей вокруг улыбаться. Пусть и тебе сегодня улыбнётся что-то хорошее. ✨",
-    "Желаю лёгкого дня — без спешки и усталости. Найди время для себя, даже если это будет всего пять минут тишины. ☕",
-    "Вика, ты классная. Просто захотелось напомнить тебе об этом сегодня. Пусть день будет в твою пользу. 🌷",
-    "Если день не задаётся — помни, что у тебя всегда есть право поставить его на паузу, выпить чашку чая и начать заново. 🍃",
-    "Сегодня желаю маленьких радостей: вкусной еды, доброго слова, неожиданно хорошей новости. Из мелочей складывается большое. 🌼",
-    "Вика, ты умеешь видеть красоту в обычных вещах — это редкое качество. Пусть сегодня тебе встретится что-то по-настоящему красивое. 🌿",
-    "Пусть сегодня будет спокойный день. Иногда тихий день — самый ценный. ☁️",
-    "Доброе утро. Ты умная, сильная и интересная — справишься со всем, что задумала на сегодня. Удачи. 🌟",
-    "Десятый день. Спасибо, что заходила сюда каждое утро ✨ Надеюсь, эти маленькие записочки делали твои дни немного теплее. 🐞",
+    "Доброе утро, Вика. Сегодня — твой день. Без причины, просто так.",
+    "Привет. Пусть тебе сегодня будет легко.",
+    "Если устанешь — закрой глаза на минуту. Этого хватит.",
+    "Знаешь, что хорошего в этом дне? Ты в нём.",
+    "Пусть тебя сегодня услышат. По-настоящему.",
+    "Ничего не желаю — просто хотел сказать тебе привет 🌿",
+    "Вика, ты — хорошая. Просто помни это.",
+    "Сегодня можно ничего не успевать. Правда.",
+    "Тёплое утро тебе. Без условий.",
+    "Десятый день. Спасибо, что заходила сюда. Это много значит. 🐞",
   ];
 
   // ============ ACCESS CONTROL ============
@@ -405,7 +545,6 @@
         time: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }),
         device: navigator.userAgent.slice(0, 80),
         screen: `${screen.width}x${screen.height}`,
-        ...extra,
       };
       const body = `🐞 ${event}\n${info.time}\n${info.device}\n${info.screen}`
         + (extra.day ? `\nДЕНЬ ${extra.day}` : '');
@@ -422,7 +561,6 @@
     const d = new Date();
     return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
   }
-
   function getDayNumber() {
     const KEY = 'lb_start_date';
     let start = localStorage.getItem(KEY);
@@ -435,13 +573,10 @@
     const diff = Math.floor((today.getTime() - startMs) / 86400000);
     return (diff % WISHES.length) + 1;
   }
-
   function isLockedToday() {
     return localStorage.getItem('lb_last_open') === todayKey() && !devMode;
   }
-  function lockToday() {
-    localStorage.setItem('lb_last_open', todayKey());
-  }
+  function lockToday() { localStorage.setItem('lb_last_open', todayKey()); }
   function markSeen(day) {
     const seen = JSON.parse(localStorage.getItem('lb_seen') || '[]');
     if (!seen.includes(day)) {
@@ -463,8 +598,7 @@
     const gain = audioCtx.createGain();
     const lfo = audioCtx.createOscillator();
     const lfoGain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.value = 180;
+    osc.type = 'sawtooth'; osc.frequency.value = 180;
     gain.gain.value = 0;
     gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.3);
     lfo.frequency.value = 12;
@@ -505,10 +639,15 @@
   const kissHeart = document.getElementById('kissHeart');
   const toast = document.getElementById('toast');
   const greetSub = document.getElementById('greetSub');
+  const vignette = document.getElementById('vignette');
+  const lensA1 = document.getElementById('lensA1');
+  const lensA2 = document.getElementById('lensA2');
 
-  let busy = false;       // animation in progress
+  let busy = false;
   let countdownTimer = null;
   let autoCloseTimer = null;
+  let currentAngle = 0;          // smoothed angle for rotation
+  const ladybugSize = 80;        // matches CSS
 
   function setPos(x, y, rotation = 0) {
     ladybug.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
@@ -516,35 +655,59 @@
 
   function getPalmCenter() {
     const r = palm.getBoundingClientRect();
-    return { x: r.left + r.width/2 - 28, y: r.top + r.height/2 - 28 };
+    return { x: r.left + r.width/2 - ladybugSize/2, y: r.top + r.height/2 - ladybugSize/2 };
   }
 
-  function bezier(t, p0, p1, p2) {
+  // ============ EASING ============
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOutCubic(t) {
+    return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+  }
+
+  // ============ CUBIC BEZIER (4 points) for smooth flight ============
+  function cubicBezier(t, p0, p1, p2, p3) {
     const u = 1 - t;
     return {
-      x: u*u*p0.x + 2*u*t*p1.x + t*t*p2.x,
-      y: u*u*p0.y + 2*u*t*p1.y + t*t*p2.y,
+      x: u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x,
+      y: u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y,
     };
   }
 
-  function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
-
-  // Animate flying along curved path
+  // ============ FLIGHT (smooth cubic bezier with smoothed rotation) ============
   function flyTo(from, to, duration) {
     return new Promise(resolve => {
-      const mid = {
-        x: (from.x + to.x) / 2 + (Math.random() - 0.5) * 200,
-        y: Math.min(from.y, to.y) - 80 - Math.random() * 60,
+      const dx = to.x - from.x, dy = to.y - from.y;
+      const dist = Math.hypot(dx, dy);
+      // Two control points for an S-curve / arching flight
+      const arch = Math.min(180, dist * 0.35);
+      const c1 = {
+        x: from.x + dx * 0.25 + (Math.random() - 0.5) * 60,
+        y: from.y + dy * 0.25 - arch,
+      };
+      const c2 = {
+        x: from.x + dx * 0.75 + (Math.random() - 0.5) * 60,
+        y: from.y + dy * 0.75 - arch * 0.6,
       };
       const start = performance.now();
+      let lastPos = from;
+
       function frame(now) {
         const t = Math.min(1, (now - start) / duration);
-        const e = easeInOut(t);
-        const pos = bezier(e, from, mid, to);
-        const ahead = bezier(Math.min(1, e + 0.02), from, mid, to);
-        const angle = Math.atan2(ahead.y - pos.y, ahead.x - pos.x) * 180 / Math.PI + 90;
-        const bob = Math.sin(now * 0.02) * 3;
-        setPos(pos.x, pos.y + bob, angle);
+        const e = easeInOutCubic(t);
+        const pos = cubicBezier(e, from, c1, c2, to);
+        // Tangent for rotation
+        const ahead = cubicBezier(Math.min(1, e + 0.015), from, c1, c2, to);
+        const rawAngle = Math.atan2(ahead.y - pos.y, ahead.x - pos.x) * 180 / Math.PI + 90;
+        // Smooth angle (low-pass filter to prevent snappy turns)
+        let delta = rawAngle - currentAngle;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        currentAngle += delta * 0.18;
+        // Subtle bobbing (smaller amplitude than before, smoother)
+        const bob = Math.sin(now * 0.012) * 1.8;
+        setPos(pos.x, pos.y + bob, currentAngle);
+        lastPos = pos;
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       }
@@ -552,26 +715,31 @@
     });
   }
 
-  // Slow crawl across screen with gentle zigzag
+  // ============ CRAWL (slow, organic, with smoothed direction) ============
   function crawlTo(from, to, duration) {
     return new Promise(resolve => {
-      const start = performance.now();
       const dx = to.x - from.x, dy = to.y - from.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      // perpendicular for slight wiggle
+      const nx = -dy / dist, ny = dx / dist;
+      const start = performance.now();
+
       function frame(now) {
         const t = Math.min(1, (now - start) / duration);
         const e = easeInOut(t);
-        // base position
-        let x = from.x + dx * e;
-        let y = from.y + dy * e;
-        // perpendicular zigzag
-        const len = Math.hypot(dx, dy) || 1;
-        const nx = -dy / len, ny = dx / len;
-        const wiggle = Math.sin(t * Math.PI * 4) * 14;
-        x += nx * wiggle; y += ny * wiggle;
-        // angle along path with slight wobble
+        // base position with subtle organic curve (very gentle wiggle)
+        const wiggle = Math.sin(t * Math.PI * 2.2) * 6;
+        const x = from.x + dx * e + nx * wiggle;
+        const y = from.y + dy * e + ny * wiggle;
+        // angle: mostly along path with tiny wobble
         const baseAngle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-        const wobble = Math.sin(now * 0.012) * 4;
-        setPos(x, y, baseAngle + wobble);
+        // Smooth angle
+        let delta = baseAngle - currentAngle;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        currentAngle += delta * 0.12;
+        const wobble = Math.sin(now * 0.008) * 2.5;
+        setPos(x, y, currentAngle + wobble);
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       }
@@ -579,58 +747,100 @@
     });
   }
 
-  // Hold position for ms (with subtle breathing)
-  function hold(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  function hold(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // ============ HEAD TURN (subtle look around) ============
+  async function headTurn(pos, deg = 14) {
+    const startAngle = currentAngle;
+    const targetAngle = startAngle + deg;
+    const start = performance.now();
+    const duration = 450;
+    return new Promise(resolve => {
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const e = easeInOut(t);
+        const a = startAngle + (targetAngle - startAngle) * e;
+        currentAngle = a;
+        setPos(pos.x, pos.y, a);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
   }
 
-  // Wink + send heart
+  // ============ GREETING DANCE: deliberate wink + send heart ============
   async function greetingDance(pos) {
-    // face down (look at viewer)
-    setPos(pos.x, pos.y, 0);
+    // Face down (toward viewer) — smooth rotation to 0
+    const startAngle = currentAngle;
+    const target = 0;
+    const t0 = performance.now();
+    await new Promise(resolve => {
+      function frame(now) {
+        const t = Math.min(1, (now - t0) / 500);
+        const e = easeInOut(t);
+        let delta = target - startAngle;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        currentAngle = startAngle + delta * e;
+        setPos(pos.x, pos.y, currentAngle);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
     await hold(300);
-    // wink
+
+    // Slow deliberate wink (one good wink, hold a beat)
     ladybug.classList.add('winking');
-    await hold(220);
+    await hold(500);
     ladybug.classList.remove('winking');
-    await hold(150);
-    ladybug.classList.add('winking');
-    await hold(220);
-    ladybug.classList.remove('winking');
-    await hold(200);
-    // send a little heart
-    kissHeart.style.left = (pos.x + 28) + 'px';
-    kissHeart.style.top  = (pos.y + 5) + 'px';
+    await hold(300);
+
+    // Send a kiss heart (centered above head)
+    kissHeart.style.left = (pos.x + ladybugSize/2) + 'px';
+    kissHeart.style.top  = (pos.y - 4) + 'px';
     kissHeart.classList.remove('fly');
     void kissHeart.offsetWidth;
     kissHeart.classList.add('fly');
     kissSound();
-    await hold(900);
+    await hold(1100);
   }
 
   function getStartCorner() {
     const corners = [
-      { x: -80, y: window.innerHeight * 0.2 },
-      { x: window.innerWidth + 30, y: window.innerHeight * 0.25 },
-      { x: -80, y: window.innerHeight * 0.65 },
-      { x: window.innerWidth + 30, y: window.innerHeight * 0.6 },
+      { x: -100, y: window.innerHeight * 0.18 },
+      { x: window.innerWidth + 30, y: window.innerHeight * 0.22 },
+      { x: -100, y: window.innerHeight * 0.62 },
+      { x: window.innerWidth + 30, y: window.innerHeight * 0.58 },
     ];
     return corners[Math.floor(Math.random() * corners.length)];
   }
 
-  // Random point in central screen for crawling start
   function getCrawlStart() {
     const w = window.innerWidth, h = window.innerHeight;
     return {
-      x: w * (0.25 + Math.random() * 0.5) - 28,
-      y: h * (0.20 + Math.random() * 0.15) - 28,
+      x: w * (0.25 + Math.random() * 0.5) - ladybugSize/2,
+      y: h * (0.18 + Math.random() * 0.10) - ladybugSize/2,
     };
   }
 
   function getCrawlEnd() {
-    // somewhere above the palm
     const palmC = getPalmCenter();
-    return { x: palmC.x + (Math.random() - 0.5) * 60, y: palmC.y - 100 };
+    return { x: palmC.x + (Math.random() - 0.5) * 60, y: palmC.y - 110 };
+  }
+
+  // ============ SHOW LENS EFFECT ============
+  function showLens(on) {
+    if (on) {
+      vignette.classList.add('show');
+      lensA1.classList.add('show');
+      lensA2.classList.add('show');
+    } else {
+      vignette.classList.remove('show');
+      lensA1.classList.remove('show');
+      lensA2.classList.remove('show');
+    }
   }
 
   // ============ FULL SEQUENCE ============
@@ -639,73 +849,84 @@
     busy = true;
     hintRing.classList.add('hidden');
     palm.classList.add('active');
-
     ladybug.classList.add('visible', 'flying');
+    currentAngle = 0;
 
-    // 1. Fly in from corner to crawl start point
+    // 1. Fly in from corner to a point in upper area
     const corner = getStartCorner();
     const crawlStart = getCrawlStart();
     setPos(corner.x, corner.y);
     startBuzz();
-    await flyTo(corner, crawlStart, 1300);
+    await flyTo(corner, crawlStart, 1700);
 
-    // 2. Land on "lens" — settle, switch to crawling
+    // 2. Land on the "lens" — switch to crawling state
     stopBuzz();
     ladybug.classList.remove('flying');
-    ladybug.classList.add('crawling', 'on-glass');
-    await hold(400);
+    ladybug.classList.add('crawling');
+    showLens(true);
+    await hold(500);  // let lens fade in + bug "settle"
 
-    // 3. Crawl across the screen (curved path via segments)
-    const crawlMid = {
-      x: (crawlStart.x + getCrawlEnd().x) / 2 + (Math.random() - 0.5) * 200,
-      y: crawlStart.y + 80 + Math.random() * 40,
+    // 3. Crawl segment 1
+    const seg1End = {
+      x: crawlStart.x + (Math.random() < 0.5 ? -1 : 1) * (60 + Math.random()*40),
+      y: crawlStart.y + 70 + Math.random() * 40,
     };
-    await crawlTo(crawlStart, crawlMid, 1700);
+    await crawlTo(crawlStart, seg1End, 2200);
+
+    // 4. Pause + look around (head turn)
     await hold(250);
+    await headTurn(seg1End, (Math.random() < 0.5 ? -1 : 1) * 16);
+    await hold(280);
 
-    // 4. Greeting dance: wink + send heart
-    await greetingDance(crawlMid);
+    // 5. Crawl segment 2 — toward final point above palm
+    const seg2End = {
+      x: (seg1End.x + getCrawlEnd().x) / 2 + (Math.random() - 0.5) * 80,
+      y: seg1End.y + 60 + Math.random() * 30,
+    };
+    await crawlTo(seg1End, seg2End, 1800);
+    await hold(200);
 
-    // 5. Continue crawling toward palm area
+    // 6. Greeting dance: wink + kiss heart
+    await greetingDance(seg2End);
+
+    // 7. Crawl to final point above palm
     const crawlEnd = getCrawlEnd();
-    await crawlTo(crawlMid, crawlEnd, 1200);
+    await crawlTo(seg2End, crawlEnd, 1500);
 
-    // 6. Take off and land on palm
-    ladybug.classList.remove('crawling', 'on-glass');
+    // 8. Take off and land on palm — fade lens out
+    showLens(false);
+    ladybug.classList.remove('crawling');
     ladybug.classList.add('flying');
     startBuzz(0.03);
     const palmC = getPalmCenter();
-    await flyTo(crawlEnd, palmC, 900);
+    await flyTo(crawlEnd, palmC, 1100);
     stopBuzz();
     ladybug.classList.remove('flying');
     setPos(palmC.x, palmC.y, 0);
 
-    // 7. Show wish
+    // 9. Show wish
     const day = getDayNumber();
     showWish(day);
     markSeen(day);
     sendPing('wish-shown', { day });
 
-    // 8. Wait WISH_DURATION_MS, then close + fly away
+    // 10. Wait, then close + fly away
     startCountdown(WISH_DURATION_MS);
     autoCloseTimer = setTimeout(async () => {
       hideWish();
       await hold(400);
-      // fly away
       ladybug.classList.add('flying');
       startBuzz();
       const exit = {
-        x: Math.random() < 0.5 ? -100 : window.innerWidth + 50,
-        y: -120 - Math.random() * 80,
+        x: Math.random() < 0.5 ? -120 : window.innerWidth + 60,
+        y: -140 - Math.random() * 80,
       };
-      await flyTo(palmC, exit, 1400);
+      await flyTo(palmC, exit, 1500);
       stopBuzz();
       ladybug.classList.remove('visible', 'flying');
-      // Lock for today
       lockToday();
       showToast('Хорошего дня, Вика 🌷', 2500);
       await hold(2700);
-      // Show "see you tomorrow" overlay
       showDoneOverlay();
       busy = false;
     }, WISH_DURATION_MS);
@@ -779,7 +1000,6 @@
     sendPing('page-open', { day: getDayNumber() });
 
     if (isLockedToday()) {
-      // already opened today
       hintRing.classList.add('hidden');
       greetSub.textContent = 'на сегодня уже всё — увидимся завтра 🌙';
       showDoneOverlay();
