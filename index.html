@@ -591,41 +591,79 @@
   function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  function startBuzz(volume = 0.04) {
+
+  // Soft layered sine "wing hum" — warm, low-pass filtered, gentle pulse
+  function startBuzz(volume = 0.014) {
     initAudio();
     if (buzzNodes) return;
-    const osc = audioCtx.createOscillator();
+    const o1 = audioCtx.createOscillator();   // fundamental
+    const o2 = audioCtx.createOscillator();   // perfect fifth (warm)
     const gain = audioCtx.createGain();
     const lfo = audioCtx.createOscillator();
     const lfoGain = audioCtx.createGain();
-    osc.type = 'sawtooth'; osc.frequency.value = 180;
+    const filter = audioCtx.createBiquadFilter();
+
+    o1.type = 'sine'; o1.frequency.value = 220;
+    o2.type = 'sine'; o2.frequency.value = 330;
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 750;
+    filter.Q.value = 0.7;
+
     gain.gain.value = 0;
-    gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.3);
-    lfo.frequency.value = 12;
-    lfoGain.gain.value = 0.025;
+    gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.6);
+
+    lfo.type = 'sine';
+    lfo.frequency.value = 5;                  // slow gentle pulse (was 12 Hz buzz)
+    lfoGain.gain.value = volume * 0.45;
     lfo.connect(lfoGain).connect(gain.gain);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start(); lfo.start();
-    buzzNodes = { osc, gain, lfo };
+
+    o1.connect(filter);
+    o2.connect(filter);
+    filter.connect(gain).connect(audioCtx.destination);
+    o1.start(); o2.start(); lfo.start();
+    buzzNodes = { o1, o2, gain, lfo };
   }
   function stopBuzz() {
     if (!buzzNodes) return;
-    const { osc, gain, lfo } = buzzNodes;
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-    setTimeout(() => { try { osc.stop(); lfo.stop(); } catch(e){} }, 350);
+    const { o1, o2, gain, lfo } = buzzNodes;
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+    setTimeout(() => { try { o1.stop(); o2.stop(); lfo.stop(); } catch(e){} }, 550);
     buzzNodes = null;
   }
+
+  // Soft glass-bell chime for the kiss
   function kissSound() {
     initAudio();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-    osc.connect(gain).connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    const now = audioCtx.currentTime;
+    [880, 1320].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.05 - i * 0.018, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 1.4);
+    });
+  }
+
+  // Gentle two-note landing chime (C5 + G5)
+  function landChime() {
+    initAudio();
+    const now = audioCtx.currentTime;
+    [523, 784].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.035 - i * 0.012, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 1.7);
+    });
   }
 
   // ============ DOM REFS ============
@@ -664,6 +702,10 @@
   function easeInOutCubic(t) {
     return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
   }
+  // Quintic — smoother than cubic, very floaty feel
+  function easeInOutQuint(t) {
+    return t < 0.5 ? 16*t*t*t*t*t : 1 - Math.pow(-2*t+2, 5)/2;
+  }
 
   // ============ CUBIC BEZIER (4 points) for smooth flight ============
   function cubicBezier(t, p0, p1, p2, p3) {
@@ -674,40 +716,37 @@
     };
   }
 
-  // ============ FLIGHT (smooth cubic bezier with smoothed rotation) ============
+  // ============ FLIGHT (smooth cubic bezier with floaty rotation) ============
   function flyTo(from, to, duration) {
     return new Promise(resolve => {
       const dx = to.x - from.x, dy = to.y - from.y;
       const dist = Math.hypot(dx, dy);
-      // Two control points for an S-curve / arching flight
-      const arch = Math.min(180, dist * 0.35);
+      // Gentle arch — high enough to feel airborne but not jumpy
+      const arch = Math.min(150, dist * 0.30);
       const c1 = {
-        x: from.x + dx * 0.25 + (Math.random() - 0.5) * 60,
-        y: from.y + dy * 0.25 - arch,
+        x: from.x + dx * 0.30 + (Math.random() - 0.5) * 40,
+        y: from.y + dy * 0.30 - arch,
       };
       const c2 = {
-        x: from.x + dx * 0.75 + (Math.random() - 0.5) * 60,
-        y: from.y + dy * 0.75 - arch * 0.6,
+        x: from.x + dx * 0.70 + (Math.random() - 0.5) * 40,
+        y: from.y + dy * 0.70 - arch * 0.55,
       };
       const start = performance.now();
-      let lastPos = from;
 
       function frame(now) {
         const t = Math.min(1, (now - start) / duration);
-        const e = easeInOutCubic(t);
+        const e = easeInOutQuint(t);                 // quintic = smoother than cubic
         const pos = cubicBezier(e, from, c1, c2, to);
-        // Tangent for rotation
-        const ahead = cubicBezier(Math.min(1, e + 0.015), from, c1, c2, to);
+        const ahead = cubicBezier(Math.min(1, e + 0.012), from, c1, c2, to);
         const rawAngle = Math.atan2(ahead.y - pos.y, ahead.x - pos.x) * 180 / Math.PI + 90;
-        // Smooth angle (low-pass filter to prevent snappy turns)
+        // Strong angle smoothing — rotation lags slightly, feels graceful
         let delta = rawAngle - currentAngle;
         while (delta > 180) delta -= 360;
         while (delta < -180) delta += 360;
-        currentAngle += delta * 0.18;
-        // Subtle bobbing (smaller amplitude than before, smoother)
-        const bob = Math.sin(now * 0.012) * 1.8;
+        currentAngle += delta * 0.09;                // was 0.18 — smoother now
+        // Very gentle bobbing — barely perceptible
+        const bob = Math.sin(now * 0.006) * 0.9;
         setPos(pos.x, pos.y + bob, currentAngle);
-        lastPos = pos;
         if (t < 1) requestAnimationFrame(frame);
         else resolve();
       }
@@ -857,14 +896,15 @@
     const crawlStart = getCrawlStart();
     setPos(corner.x, corner.y);
     startBuzz();
-    await flyTo(corner, crawlStart, 1700);
+    await flyTo(corner, crawlStart, 2400);
 
     // 2. Land on the "lens" — switch to crawling state
     stopBuzz();
+    landChime();
     ladybug.classList.remove('flying');
     ladybug.classList.add('crawling');
     showLens(true);
-    await hold(500);  // let lens fade in + bug "settle"
+    await hold(550);  // let lens fade in + bug "settle"
 
     // 3. Crawl segment 1
     const seg1End = {
@@ -897,10 +937,11 @@
     showLens(false);
     ladybug.classList.remove('crawling');
     ladybug.classList.add('flying');
-    startBuzz(0.03);
+    startBuzz(0.010);
     const palmC = getPalmCenter();
-    await flyTo(crawlEnd, palmC, 1100);
+    await flyTo(crawlEnd, palmC, 1500);
     stopBuzz();
+    landChime();
     ladybug.classList.remove('flying');
     setPos(palmC.x, palmC.y, 0);
 
@@ -921,7 +962,7 @@
         x: Math.random() < 0.5 ? -120 : window.innerWidth + 60,
         y: -140 - Math.random() * 80,
       };
-      await flyTo(palmC, exit, 1500);
+      await flyTo(palmC, exit, 2000);
       stopBuzz();
       ladybug.classList.remove('visible', 'flying');
       lockToday();
