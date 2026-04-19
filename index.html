@@ -695,18 +695,20 @@
   // ============ NTFY TRACKING ============
   function sendPing(event, extra = {}) {
     try {
-      const info = {
-        event,
-        time: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }),
-        device: navigator.userAgent.slice(0, 80),
-        screen: `${screen.width}x${screen.height}`,
-      };
-      const body = `🐞 ${event}\n${info.time}\n${info.device}\n${info.screen}`
-        + (extra.day ? `\nДЕНЬ ${extra.day}` : '');
+      const time = new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+      const device = navigator.userAgent.slice(0, 80);
+      const dayLine = extra.day ? `\nДЕНЬ ${extra.day}` : '';
+      // Body can be UTF-8; HTTP headers must be ASCII (no Cyrillic)
+      const body = `🐞 Вика — ${event}\n${time}\n${device}\n${screen.width}x${screen.height}${dayLine}`;
       fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
         method: 'POST',
         body,
-        headers: { 'Title': `Вика: ${event}`, 'Priority': '3', 'Tags': 'ladybug' },
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Title': `Vika: ${event}`,        // ASCII only
+          'Priority': '3',
+          'Tags': 'ladybug',
+        },
       }).catch(() => {});
     } catch (e) {}
   }
