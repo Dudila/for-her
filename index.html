@@ -19,18 +19,71 @@
   }
 
   body {
-    background: linear-gradient(160deg,
-      #ffe4ec 0%, #ffd1dc 25%, #fcb6c8 50%, #e8a5c0 75%, #c794b8 100%);
+    /* Sky: soft sunrise — peach → pink → light blue */
+    background: linear-gradient(180deg,
+      #ffe9d3 0%,    /* warm dawn light */
+      #ffd1c8 25%,
+      #fcc6d8 50%,
+      #e8d4f0 70%,
+      #c8e4f0 100%); /* light blue near horizon */
     position: relative;
   }
 
-  /* Soft glow blobs */
-  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; pointer-events: none; }
-  .blob.b1 { width: 300px; height: 300px; background: #fff5d1; top: 10%; left: 8%; animation: float1 18s ease-in-out infinite; }
-  .blob.b2 { width: 250px; height: 250px; background: #ffd6e8; top: 60%; right: 10%; animation: float2 22s ease-in-out infinite; }
-  .blob.b3 { width: 200px; height: 200px; background: #d4b3ff; top: 70%; left: 15%; animation: float1 25s ease-in-out infinite reverse; }
-  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
-  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,40px)} }
+  /* Sun glow */
+  .sun {
+    position: absolute;
+    top: 8%; right: 12%;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle,
+      rgba(255,235,180,0.85) 0%,
+      rgba(255,220,150,0.5) 40%,
+      rgba(255,210,130,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Soft cloud blobs */
+  .cloud { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.55; pointer-events: none; z-index: 1; }
+  .cloud.c1 { width: 280px; height: 80px; background: rgba(255,255,255,0.7); top: 18%; left: -5%; animation: drift1 35s ease-in-out infinite; }
+  .cloud.c2 { width: 220px; height: 60px; background: rgba(255,240,250,0.6); top: 30%; right: 5%; animation: drift2 40s ease-in-out infinite; }
+  .cloud.c3 { width: 180px; height: 50px; background: rgba(255,255,255,0.5); top: 12%; left: 40%; animation: drift1 50s ease-in-out infinite reverse; }
+  @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,-10px)} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,8px)} }
+
+  /* ============ MEADOW (bottom of screen) ============ */
+  .meadow {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(180deg,
+      rgba(180, 220, 130, 0) 0%,
+      rgba(150, 200, 110, 0.5) 30%,
+      rgba(110, 180, 90, 0.75) 65%,
+      rgba(70, 140, 70, 0.85) 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Grass blades — randomly scattered SVG */
+  .meadow-svg {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Background flowers — small silhouettes */
+  .bg-flower {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  }
+  .bg-flower.sway1 { animation: flowerSway1 6s ease-in-out infinite; transform-origin: bottom center; }
+  .bg-flower.sway2 { animation: flowerSway2 8s ease-in-out infinite; transform-origin: bottom center; }
+  @keyframes flowerSway1 { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} }
+  @keyframes flowerSway2 { 0%,100%{transform:rotate(2deg)} 50%{transform:rotate(-3deg)} }
 
   /* Camera-lens vignette (only visible while crawling) */
   .vignette {
@@ -66,33 +119,39 @@
   }
   .greeting p { font-size: 0.95rem; color: #8b5570; opacity: 0.85; }
 
-  /* Palm */
+  /* Main daisy flower (replaces palm) */
   .palm-area {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 260px; height: 260px;
-    cursor: pointer; z-index: 3;
+    width: 280px; height: 320px;
+    cursor: pointer; z-index: 4;
   }
   .palm-svg {
     width: 100%; height: 100%;
-    filter: drop-shadow(0 8px 20px rgba(120, 60, 90, 0.3));
+    filter: drop-shadow(0 10px 22px rgba(120, 90, 50, 0.35));
+    transform-origin: bottom center;
+    animation: mainFlowerSway 5s ease-in-out infinite;
     transition: transform 0.4s ease;
   }
-  .palm-area.active .palm-svg { transform: scale(1.05) translateY(-4px); }
+  @keyframes mainFlowerSway {
+    0%, 100% { transform: rotate(-1.5deg); }
+    50%      { transform: rotate(1.5deg); }
+  }
+  .palm-area.active .palm-svg { animation: none; transform: scale(1.04) translateY(-4px); }
 
   .hint-ring {
     position: absolute; top: 50%; left: 50%;
-    width: 200px; height: 200px;
-    border: 2px solid rgba(255,255,255,0.6); border-radius: 50%;
-    transform: translate(-50%, -50%);
+    width: 130px; height: 130px;
+    border: 2px solid rgba(255,255,255,0.7); border-radius: 50%;
+    transform: translate(-50%, -75%);
     animation: pulse 2.5s ease-in-out infinite;
     pointer-events: none;
   }
   .hint-ring.hidden { display: none; }
   @keyframes pulse {
-    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
-    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
-    100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+    0% { transform: translate(-50%, -75%) scale(0.9); opacity: 0.7; }
+    50% { transform: translate(-50%, -75%) scale(1.15); opacity: 0; }
+    100% { transform: translate(-50%, -75%) scale(0.9); opacity: 0; }
   }
 
   /* ============ LADYBUG ============ */
@@ -331,9 +390,81 @@
 </head>
 <body>
 
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
+  <!-- ============ SKY ============ -->
+  <div class="sun"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+
+  <!-- ============ MEADOW (background) ============ -->
+  <div class="meadow"></div>
+
+  <!-- Background flowers — small silhouettes scattered in the grass -->
+  <svg class="bg-flower sway1" style="bottom:5%; left:8%; width:55px;"  viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="42" stroke="#5a8e3a" stroke-width="2"/>
+    <ellipse cx="22" cy="68" rx="6" ry="3" fill="#7ab058" transform="rotate(-30 22 68)"/>
+    <ellipse cx="38" cy="55" rx="6" ry="3" fill="#7ab058" transform="rotate(30 38 55)"/>
+    <g>
+      <ellipse cx="30" cy="30" rx="5" ry="12" fill="#fff" opacity="0.92"/>
+      <ellipse cx="30" cy="30" rx="5" ry="12" fill="#fff" opacity="0.92" transform="rotate(60 30 30)"/>
+      <ellipse cx="30" cy="30" rx="5" ry="12" fill="#fff" opacity="0.92" transform="rotate(-60 30 30)"/>
+      <circle cx="30" cy="30" r="5" fill="#f5c542"/>
+    </g>
+  </svg>
+  <svg class="bg-flower sway2" style="bottom:3%; left:22%; width:45px;" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="42" stroke="#5a8e3a" stroke-width="2"/>
+    <ellipse cx="22" cy="65" rx="5" ry="2.5" fill="#7ab058" transform="rotate(-30 22 65)"/>
+    <g>
+      <ellipse cx="30" cy="32" rx="4" ry="10" fill="#ffb6d5"/>
+      <ellipse cx="30" cy="32" rx="4" ry="10" fill="#ffb6d5" transform="rotate(72 30 32)"/>
+      <ellipse cx="30" cy="32" rx="4" ry="10" fill="#ffb6d5" transform="rotate(144 30 32)"/>
+      <ellipse cx="30" cy="32" rx="4" ry="10" fill="#ffb6d5" transform="rotate(-72 30 32)"/>
+      <ellipse cx="30" cy="32" rx="4" ry="10" fill="#ffb6d5" transform="rotate(-144 30 32)"/>
+      <circle cx="30" cy="32" r="3.5" fill="#fff7c0"/>
+    </g>
+  </svg>
+  <svg class="bg-flower sway1" style="bottom:6%; right:10%; width:50px;" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="42" stroke="#5a8e3a" stroke-width="2"/>
+    <ellipse cx="38" cy="60" rx="6" ry="3" fill="#7ab058" transform="rotate(30 38 60)"/>
+    <g>
+      <ellipse cx="30" cy="30" rx="4.5" ry="11" fill="#d8a8ff"/>
+      <ellipse cx="30" cy="30" rx="4.5" ry="11" fill="#d8a8ff" transform="rotate(72 30 30)"/>
+      <ellipse cx="30" cy="30" rx="4.5" ry="11" fill="#d8a8ff" transform="rotate(144 30 30)"/>
+      <ellipse cx="30" cy="30" rx="4.5" ry="11" fill="#d8a8ff" transform="rotate(-72 30 30)"/>
+      <ellipse cx="30" cy="30" rx="4.5" ry="11" fill="#d8a8ff" transform="rotate(-144 30 30)"/>
+      <circle cx="30" cy="30" r="3.5" fill="#f5c542"/>
+    </g>
+  </svg>
+  <svg class="bg-flower sway2" style="bottom:4%; right:25%; width:40px;" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="42" stroke="#5a8e3a" stroke-width="2"/>
+    <g>
+      <ellipse cx="30" cy="32" rx="3.5" ry="9" fill="#fff" opacity="0.9"/>
+      <ellipse cx="30" cy="32" rx="3.5" ry="9" fill="#fff" opacity="0.9" transform="rotate(60 30 32)"/>
+      <ellipse cx="30" cy="32" rx="3.5" ry="9" fill="#fff" opacity="0.9" transform="rotate(-60 30 32)"/>
+      <circle cx="30" cy="32" r="4" fill="#f5c542"/>
+    </g>
+  </svg>
+  <svg class="bg-flower sway1" style="bottom:2%; left:38%; width:38px;" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="50" stroke="#5a8e3a" stroke-width="2"/>
+    <g>
+      <circle cx="25" cy="38" r="4" fill="#ffb6d5"/>
+      <circle cx="35" cy="38" r="4" fill="#ffb6d5"/>
+      <circle cx="30" cy="32" r="4" fill="#ffb6d5"/>
+      <circle cx="30" cy="42" r="3" fill="#ffb6d5"/>
+      <circle cx="30" cy="38" r="2" fill="#fff7c0"/>
+    </g>
+  </svg>
+  <svg class="bg-flower sway2" style="bottom:5%; left:60%; width:42px;" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="30" y1="100" x2="30" y2="48" stroke="#5a8e3a" stroke-width="2"/>
+    <ellipse cx="22" cy="68" rx="5" ry="2.5" fill="#7ab058" transform="rotate(-30 22 68)"/>
+    <g>
+      <circle cx="25" cy="38" r="5" fill="#a8d8ff"/>
+      <circle cx="35" cy="38" r="5" fill="#a8d8ff"/>
+      <circle cx="30" cy="32" r="5" fill="#a8d8ff"/>
+      <circle cx="30" cy="44" r="4" fill="#a8d8ff"/>
+      <circle cx="30" cy="38" r="2.5" fill="#f5c542"/>
+    </g>
+  </svg>
 
   <!-- Lens reflections only when crawling -->
   <div class="lens-arc a1" id="lensA1"></div>
@@ -342,32 +473,61 @@
 
   <div class="greeting" id="greeting">
     <h1 id="greetTitle">Доброе утро, Вика</h1>
-    <p id="greetSub">наведи на ладошку 🐞</p>
+    <p id="greetSub">наведи на ромашку 🐞</p>
   </div>
 
+  <!-- ============ MAIN DAISY (replaces the palm) ============ -->
   <div class="palm-area" id="palm">
     <div class="hint-ring" id="hintRing"></div>
-    <svg class="palm-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <svg class="palm-svg" viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="palmGrad" cx="50%" cy="40%" r="60%">
-          <stop offset="0%" stop-color="#ffe0d0" />
-          <stop offset="60%" stop-color="#ffc8b0" />
-          <stop offset="100%" stop-color="#e8a890" />
+        <radialGradient id="petalGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="80%" stop-color="#fff8f5"/>
+          <stop offset="100%" stop-color="#f3e0e8"/>
         </radialGradient>
-        <radialGradient id="palmCenter" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ffefe0" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#ffefe0" stop-opacity="0"/>
+        <radialGradient id="centerGrad" cx="40%" cy="40%" r="60%">
+          <stop offset="0%"  stop-color="#ffe88a"/>
+          <stop offset="60%" stop-color="#f5c542"/>
+          <stop offset="100%" stop-color="#c98e1f"/>
         </radialGradient>
       </defs>
-      <path d="M 40 110 Q 30 70, 60 50 Q 70 35, 85 45 Q 90 30, 105 38
-               Q 115 28, 125 42 Q 140 35, 148 55 Q 170 70, 160 110
-               Q 165 140, 145 165 Q 120 185, 100 180 Q 75 185, 55 165
-               Q 35 140, 40 110 Z"
-            fill="url(#palmGrad)" stroke="#d49080" stroke-width="1.5"/>
-      <path d="M 70 95 Q 100 105, 135 95" stroke="#c47868" stroke-width="1" fill="none" opacity="0.4"/>
-      <path d="M 65 120 Q 100 130, 140 118" stroke="#c47868" stroke-width="1" fill="none" opacity="0.4"/>
-      <path d="M 80 80 Q 85 110, 80 145" stroke="#c47868" stroke-width="1" fill="none" opacity="0.3"/>
-      <ellipse cx="100" cy="115" rx="40" ry="35" fill="url(#palmCenter)"/>
+
+      <!-- Stem -->
+      <path d="M 120 320 Q 116 250 120 180" stroke="#4a8030" stroke-width="6"
+            fill="none" stroke-linecap="round"/>
+
+      <!-- Two leaves on stem -->
+      <ellipse cx="92" cy="240" rx="22" ry="9" fill="#5fa53c"
+               transform="rotate(-30 92 240)" stroke="#3d7028" stroke-width="1"/>
+      <ellipse cx="148" cy="215" rx="20" ry="8" fill="#6cb045"
+               transform="rotate(35 148 215)" stroke="#3d7028" stroke-width="1"/>
+
+      <!-- Petals (12 around center at 120,120) -->
+      <g>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(30 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(60 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(90 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(120 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(150 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(180 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(210 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(240 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(270 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(300 120 120)"/>
+        <ellipse cx="120" cy="60" rx="14" ry="38" fill="url(#petalGrad)" stroke="#e8d4d8" stroke-width="0.8" transform="rotate(330 120 120)"/>
+      </g>
+
+      <!-- Flower center (landing area) -->
+      <circle cx="120" cy="120" r="32" fill="url(#centerGrad)" stroke="#a87420" stroke-width="1.5"/>
+      <!-- Tiny dots on the center for texture -->
+      <circle cx="110" cy="112" r="1.5" fill="#a87420" opacity="0.5"/>
+      <circle cx="125" cy="115" r="1.5" fill="#a87420" opacity="0.5"/>
+      <circle cx="115" cy="125" r="1.5" fill="#a87420" opacity="0.5"/>
+      <circle cx="128" cy="128" r="1.5" fill="#a87420" opacity="0.5"/>
+      <circle cx="120" cy="118" r="1.5" fill="#a87420" opacity="0.5"/>
+      <circle cx="118" cy="130" r="1.5" fill="#a87420" opacity="0.5"/>
     </svg>
   </div>
 
@@ -693,7 +853,11 @@
 
   function getPalmCenter() {
     const r = palm.getBoundingClientRect();
-    return { x: r.left + r.width/2 - ladybugSize/2, y: r.top + r.height/2 - ladybugSize/2 };
+    // Daisy yellow center sits at ~37.5% from top of the SVG (viewBox 120/320)
+    return {
+      x: r.left + r.width / 2 - ladybugSize / 2,
+      y: r.top + r.height * 0.375 - ladybugSize / 2,
+    };
   }
 
   // ============ EASING ============
