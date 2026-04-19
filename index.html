@@ -2,110 +2,79 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Для тебя ✨</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#fcb6c8" />
+<title>Доброе утро ✨</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   html, body {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     overflow: hidden;
     font-family: 'Georgia', 'Times New Roman', serif;
     color: #5a3a4a;
-    user-select: none;
-    -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
+    touch-action: manipulation;
   }
 
   body {
     background: linear-gradient(160deg,
-      #ffe4ec 0%,
-      #ffd1dc 25%,
-      #fcb6c8 50%,
-      #e8a5c0 75%,
-      #c794b8 100%);
+      #ffe4ec 0%, #ffd1dc 25%, #fcb6c8 50%, #e8a5c0 75%, #c794b8 100%);
     position: relative;
   }
 
-  /* Soft floating clouds / glow blobs in background */
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    opacity: 0.5;
-    pointer-events: none;
-  }
+  /* Soft glow blobs */
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.5; pointer-events: none; }
   .blob.b1 { width: 300px; height: 300px; background: #fff5d1; top: 10%; left: 8%; animation: float1 18s ease-in-out infinite; }
   .blob.b2 { width: 250px; height: 250px; background: #ffd6e8; top: 60%; right: 10%; animation: float2 22s ease-in-out infinite; }
   .blob.b3 { width: 200px; height: 200px; background: #d4b3ff; top: 70%; left: 15%; animation: float1 25s ease-in-out infinite reverse; }
+  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(40px,-30px)} }
+  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,40px)} }
 
-  @keyframes float1 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(40px, -30px); }
-  }
-  @keyframes float2 {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(-50px, 40px); }
+  /* Subtle camera-lens vignette */
+  .vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center,
+      rgba(0,0,0,0) 50%, rgba(60,30,50,0.18) 90%, rgba(40,20,30,0.35) 100%);
+    pointer-events: none; z-index: 8;
   }
 
-  /* Header / instruction */
+  /* Greeting */
   .greeting {
-    position: absolute;
-    top: 5%;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 5;
+    position: absolute; top: 6%; left: 50%; transform: translateX(-50%);
+    text-align: center; z-index: 5; width: 90%; max-width: 500px;
   }
   .greeting h1 {
-    font-size: 2.2rem;
-    font-weight: normal;
-    color: #6b3550;
-    text-shadow: 0 2px 8px rgba(255,255,255,0.6);
-    margin-bottom: 8px;
-    font-style: italic;
+    font-size: 1.9rem; font-weight: normal;
+    color: #6b3550; text-shadow: 0 2px 8px rgba(255,255,255,0.6);
+    margin-bottom: 8px; font-style: italic;
   }
-  .greeting p {
-    font-size: 1rem;
-    color: #8b5570;
-    opacity: 0.85;
-  }
+  .greeting p { font-size: 0.95rem; color: #8b5570; opacity: 0.85; }
 
-  /* Palm container */
+  /* Palm */
   .palm-area {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 280px;
-    height: 280px;
-    cursor: pointer;
-    z-index: 3;
+    width: 260px; height: 260px;
+    cursor: pointer; z-index: 3;
   }
-
   .palm-svg {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     filter: drop-shadow(0 8px 20px rgba(120, 60, 90, 0.3));
     transition: transform 0.4s ease;
   }
-  .palm-area:hover .palm-svg {
-    transform: scale(1.05) translateY(-4px);
-  }
+  .palm-area.active .palm-svg { transform: scale(1.05) translateY(-4px); }
 
-  /* Pulsing hint ring */
   .hint-ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 200px;
-    height: 200px;
-    border: 2px solid rgba(255,255,255,0.6);
-    border-radius: 50%;
+    position: absolute; top: 50%; left: 50%;
+    width: 200px; height: 200px;
+    border: 2px solid rgba(255,255,255,0.6); border-radius: 50%;
     transform: translate(-50%, -50%);
     animation: pulse 2.5s ease-in-out infinite;
     pointer-events: none;
   }
+  .hint-ring.hidden { display: none; }
   @keyframes pulse {
     0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
     50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
@@ -115,188 +84,167 @@
   /* Ladybug */
   .ladybug {
     position: absolute;
-    width: 60px;
-    height: 60px;
-    pointer-events: none;
-    z-index: 10;
-    transform-origin: center;
-    will-change: transform;
-    opacity: 0;
-    transition: opacity 0.3s;
+    width: 56px; height: 56px;
+    pointer-events: none; z-index: 10;
+    transform-origin: center; will-change: transform;
+    opacity: 0; transition: opacity 0.3s, filter 0.4s;
+    top: 0; left: 0;
   }
-  .ladybug.visible { opacity: 1; pointer-events: auto; cursor: pointer; }
-
-  .ladybug-body {
-    width: 100%;
-    height: 100%;
-    transform-origin: center;
+  .ladybug.visible { opacity: 1; }
+  .ladybug.on-glass {
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.6))
+            drop-shadow(0 2px 6px rgba(0,0,0,0.15));
   }
+  .ladybug-body { width: 100%; height: 100%; transform-origin: center; }
 
-  /* Wing flutter when flying */
-  .wing {
-    transform-origin: 30px 28px;
-    animation: flutter 0.08s ease-in-out infinite alternate;
-  }
-  .ladybug.landed .wing { animation: none; }
-  .wing.right { transform-origin: 30px 28px; }
-
+  .wing { transform-origin: 28px 28px; }
+  .ladybug.flying .wing { animation: flutter 0.07s ease-in-out infinite alternate; }
+  .ladybug.crawling .wing { transform: scaleX(0.6); opacity: 0.3; }
   @keyframes flutter {
     0% { transform: rotateY(0deg) scaleX(1); }
     100% { transform: rotateY(70deg) scaleX(0.5); }
   }
 
+  /* Wink eyelid (right eye) */
+  .eyelid {
+    transform-origin: 32px 13px;
+    transform: scaleY(0);
+    transition: transform 0.15s ease-in-out;
+  }
+  .ladybug.winking .eyelid { transform: scaleY(1); }
+
+  /* Tiny heart (kiss) */
+  .kiss-heart {
+    position: absolute;
+    font-size: 1.4rem;
+    pointer-events: none;
+    z-index: 11;
+    opacity: 0;
+  }
+  .kiss-heart.fly {
+    animation: kissFly 1.4s ease-out forwards;
+  }
+  @keyframes kissFly {
+    0% { opacity: 0; transform: translate(-50%, 0) scale(0.4); }
+    20% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -90px) scale(0.7); }
+  }
+
   /* Wish card */
   .wish-card {
-    position: absolute;
-    bottom: -300px;
-    left: 50%;
+    position: absolute; bottom: -400px; left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 450px;
-    background: rgba(255, 255, 255, 0.92);
+    width: 90%; max-width: 440px;
+    background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(10px);
-    border-radius: 24px;
-    padding: 30px 28px;
+    border-radius: 22px;
+    padding: 26px 24px 22px;
     box-shadow: 0 20px 60px rgba(120, 60, 90, 0.25);
     text-align: center;
-    transition: bottom 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: bottom 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 20;
   }
   .wish-card.show { bottom: 8%; }
-
   .wish-card .day-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #ff6b9d, #c44569);
-    color: white;
-    padding: 4px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    margin-bottom: 14px;
-    letter-spacing: 1px;
+    background: linear-gradient(135deg, #ff8eb1, #c44569);
+    color: white; padding: 4px 12px; border-radius: 18px;
+    font-size: 0.75rem; margin-bottom: 12px; letter-spacing: 1px;
   }
   .wish-card .wish-text {
-    font-size: 1.15rem;
-    line-height: 1.6;
-    color: #5a3a4a;
-    font-style: italic;
+    font-size: 1.1rem; line-height: 1.55; color: #5a3a4a; font-style: italic;
   }
-  .wish-card .signature {
-    margin-top: 16px;
-    font-size: 0.9rem;
-    color: #a06080;
-  }
-  .wish-card .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 14px;
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    color: #b08090;
-    cursor: pointer;
-    line-height: 1;
+  .wish-card .countdown {
+    margin-top: 14px; font-size: 0.75rem; color: #b08090; opacity: 0.7;
   }
 
-  /* Floating hearts */
+  /* Floating hearts on click */
   .heart {
-    position: absolute;
-    font-size: 1.6rem;
-    pointer-events: none;
-    z-index: 15;
+    position: absolute; font-size: 1.5rem;
+    pointer-events: none; z-index: 15;
     animation: floatUp 1.6s ease-out forwards;
   }
   @keyframes floatUp {
     0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
     20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
-    100% { transform: translate(calc(-50% + var(--dx, 0)), -180px) scale(0.8); opacity: 0; }
+    100% { transform: translate(calc(-50% + var(--dx, 0)), -150px) scale(0.7); opacity: 0; }
   }
 
-  /* Calendar button */
+  /* Calendar */
   .calendar-btn {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(255, 255, 255, 0.85);
-    border: none;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 1.4rem;
+    position: absolute; bottom: 18px; right: 18px;
+    background: rgba(255,255,255,0.85); border: none;
+    width: 48px; height: 48px; border-radius: 50%;
+    cursor: pointer; font-size: 1.3rem;
     box-shadow: 0 4px 12px rgba(120, 60, 90, 0.2);
-    transition: transform 0.2s;
     z-index: 30;
   }
-  .calendar-btn:hover { transform: scale(1.1); }
-
-  /* Calendar modal */
   .calendar-modal {
-    position: fixed;
-    inset: 0;
+    position: fixed; inset: 0;
     background: rgba(90, 50, 70, 0.6);
     backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 20px;
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
   }
   .calendar-modal.show { display: flex; }
-
   .calendar-content {
-    background: white;
-    border-radius: 24px;
-    padding: 28px 24px;
-    max-width: 480px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
+    background: white; border-radius: 22px;
+    padding: 24px 20px; max-width: 460px; width: 100%;
+    max-height: 85vh; overflow-y: auto;
     box-shadow: 0 30px 80px rgba(0,0,0,0.3);
   }
   .calendar-content h2 {
-    text-align: center;
-    color: #6b3550;
-    font-weight: normal;
-    margin-bottom: 20px;
-    font-style: italic;
+    text-align: center; color: #6b3550; font-weight: normal;
+    margin-bottom: 16px; font-style: italic;
   }
-  .calendar-list { display: flex; flex-direction: column; gap: 12px; }
+  .calendar-list { display: flex; flex-direction: column; gap: 10px; }
   .cal-item {
-    padding: 14px 18px;
-    border-radius: 14px;
-    background: #fff5f8;
-    border-left: 4px solid #ffb6c1;
+    padding: 12px 16px; border-radius: 12px;
+    background: #fff5f8; border-left: 4px solid #ffb6c1;
   }
-  .cal-item.locked {
-    background: #f5f5f5;
-    border-left-color: #ddd;
-    color: #999;
-    font-style: italic;
-  }
-  .cal-item .cal-day {
-    font-weight: bold;
-    color: #c44569;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-    letter-spacing: 1px;
-  }
+  .cal-item.locked { background: #f5f5f5; border-left-color: #ddd; color: #999; font-style: italic; }
+  .cal-item .cal-day { font-weight: bold; color: #c44569; font-size: 0.78rem; margin-bottom: 4px; letter-spacing: 1px; }
   .cal-item.locked .cal-day { color: #aaa; }
-  .cal-item .cal-text { font-size: 1rem; line-height: 1.5; }
-
+  .cal-item .cal-text { font-size: 0.95rem; line-height: 1.5; }
   .cal-close {
-    display: block;
-    margin: 20px auto 0;
-    background: linear-gradient(135deg, #ff6b9d, #c44569);
-    color: white;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 1rem;
+    display: block; margin: 18px auto 0;
+    background: linear-gradient(135deg, #ff8eb1, #c44569);
+    color: white; border: none;
+    padding: 9px 26px; border-radius: 18px;
+    cursor: pointer; font-size: 0.95rem;
   }
+
+  /* Full-screen overlays (blocked / locked / done) */
+  .overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: linear-gradient(160deg, #ffe4ec 0%, #fcb6c8 50%, #c794b8 100%);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 30px;
+  }
+  .overlay.show { display: flex; }
+  .overlay .icon { font-size: 4rem; margin-bottom: 18px; }
+  .overlay h2 { font-size: 1.6rem; color: #6b3550; font-weight: normal; font-style: italic; margin-bottom: 12px; }
+  .overlay p { font-size: 1rem; color: #8b5570; max-width: 400px; line-height: 1.5; }
+
+  /* Floating "good day" toast */
+  .toast {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    padding: 18px 28px; border-radius: 18px;
+    font-size: 1.1rem; color: #6b3550; font-style: italic;
+    box-shadow: 0 12px 40px rgba(120, 60, 90, 0.25);
+    z-index: 50;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .toast.show { opacity: 1; }
 
   @media (max-width: 600px) {
-    .greeting h1 { font-size: 1.6rem; }
+    .greeting h1 { font-size: 1.5rem; }
+    .greeting p { font-size: 0.85rem; }
     .palm-area { width: 220px; height: 220px; }
   }
 </style>
@@ -306,17 +254,16 @@
   <div class="blob b1"></div>
   <div class="blob b2"></div>
   <div class="blob b3"></div>
+  <div class="vignette"></div>
 
-  <div class="greeting">
-    <h1>Доброе утро, моя любимая</h1>
-    <p>наведи на ладошку, к тебе кое-кто прилетит ✨</p>
+  <div class="greeting" id="greeting">
+    <h1 id="greetTitle">Доброе утро, Вика ✨</h1>
+    <p id="greetSub">наведи на ладошку — у меня кое-что для тебя 🐞</p>
   </div>
 
-  <!-- Palm with pulsing hint -->
   <div class="palm-area" id="palm">
-    <div class="hint-ring"></div>
+    <div class="hint-ring" id="hintRing"></div>
     <svg class="palm-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <!-- soft palm/hand cupped shape -->
       <defs>
         <radialGradient id="palmGrad" cx="50%" cy="40%" r="60%">
           <stop offset="0%" stop-color="#ffe0d0" />
@@ -328,163 +275,212 @@
           <stop offset="100%" stop-color="#ffefe0" stop-opacity="0"/>
         </radialGradient>
       </defs>
-      <!-- Cupped palm shape -->
-      <path d="M 40 110
-               Q 30 70, 60 50
-               Q 70 35, 85 45
-               Q 90 30, 105 38
-               Q 115 28, 125 42
-               Q 140 35, 148 55
-               Q 170 70, 160 110
-               Q 165 140, 145 165
-               Q 120 185, 100 180
-               Q 75 185, 55 165
+      <path d="M 40 110 Q 30 70, 60 50 Q 70 35, 85 45 Q 90 30, 105 38
+               Q 115 28, 125 42 Q 140 35, 148 55 Q 170 70, 160 110
+               Q 165 140, 145 165 Q 120 185, 100 180 Q 75 185, 55 165
                Q 35 140, 40 110 Z"
             fill="url(#palmGrad)" stroke="#d49080" stroke-width="1.5"/>
-      <!-- Palm lines (gentle creases) -->
       <path d="M 70 95 Q 100 105, 135 95" stroke="#c47868" stroke-width="1" fill="none" opacity="0.4"/>
       <path d="M 65 120 Q 100 130, 140 118" stroke="#c47868" stroke-width="1" fill="none" opacity="0.4"/>
       <path d="M 80 80 Q 85 110, 80 145" stroke="#c47868" stroke-width="1" fill="none" opacity="0.3"/>
-      <!-- Soft glow center -->
       <ellipse cx="100" cy="115" rx="40" ry="35" fill="url(#palmCenter)"/>
     </svg>
   </div>
 
-  <!-- Ladybug -->
   <div class="ladybug" id="ladybug">
     <svg class="ladybug-body" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-      <!-- Shadow under -->
       <ellipse cx="30" cy="52" rx="18" ry="3" fill="rgba(0,0,0,0.15)"/>
-      <!-- Body (red dome) -->
       <ellipse cx="30" cy="32" rx="22" ry="20" fill="#d63031" stroke="#2d3436" stroke-width="1.5"/>
-      <!-- Center line -->
       <line x1="30" y1="14" x2="30" y2="50" stroke="#2d3436" stroke-width="1.5"/>
-      <!-- Spots -->
       <circle cx="20" cy="24" r="3" fill="#2d3436"/>
       <circle cx="40" cy="24" r="3" fill="#2d3436"/>
       <circle cx="18" cy="36" r="2.5" fill="#2d3436"/>
       <circle cx="42" cy="36" r="2.5" fill="#2d3436"/>
       <circle cx="24" cy="44" r="2.5" fill="#2d3436"/>
       <circle cx="36" cy="44" r="2.5" fill="#2d3436"/>
-      <!-- Head -->
       <ellipse cx="30" cy="14" rx="10" ry="8" fill="#2d3436"/>
-      <!-- Eyes -->
+      <!-- left eye -->
       <circle cx="26" cy="13" r="1.8" fill="white"/>
-      <circle cx="34" cy="13" r="1.8" fill="white"/>
       <circle cx="26" cy="13" r="0.9" fill="#2d3436"/>
+      <!-- right eye + eyelid for wink -->
+      <circle cx="34" cy="13" r="1.8" fill="white"/>
       <circle cx="34" cy="13" r="0.9" fill="#2d3436"/>
-      <!-- Antennae -->
+      <ellipse class="eyelid" cx="34" cy="13" rx="2.2" ry="2" fill="#2d3436"/>
+      <!-- antennae -->
       <path d="M 26 8 Q 22 4, 20 2" stroke="#2d3436" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       <path d="M 34 8 Q 38 4, 40 2" stroke="#2d3436" stroke-width="1.2" fill="none" stroke-linecap="round"/>
       <circle cx="20" cy="2" r="1.2" fill="#2d3436"/>
       <circle cx="40" cy="2" r="1.2" fill="#2d3436"/>
-      <!-- Wings (translucent, animated) -->
+      <!-- wings (translucent) -->
       <ellipse class="wing left" cx="22" cy="28" rx="14" ry="16" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
       <ellipse class="wing right" cx="38" cy="28" rx="14" ry="16" fill="rgba(255,255,255,0.35)" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
     </svg>
   </div>
 
-  <!-- Wish card -->
+  <div class="kiss-heart" id="kissHeart">💕</div>
+
   <div class="wish-card" id="wishCard">
-    <button class="close-btn" id="closeWish">×</button>
     <div class="day-badge" id="dayBadge">ДЕНЬ 1</div>
     <p class="wish-text" id="wishText"></p>
-    <p class="signature">— с любовью 💗</p>
+    <div class="countdown" id="countdown">закроется через 10…</div>
   </div>
 
-  <!-- Calendar button -->
-  <button class="calendar-btn" id="calBtn" title="Прошлые пожелания">📖</button>
+  <button class="calendar-btn" id="calBtn" title="Прошлые дни">📖</button>
 
-  <!-- Calendar modal -->
   <div class="calendar-modal" id="calModal">
     <div class="calendar-content">
-      <h2>Все наши дни ✨</h2>
+      <h2>Прошедшие дни ✨</h2>
       <div class="calendar-list" id="calList"></div>
       <button class="cal-close" id="calClose">закрыть</button>
     </div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
+  <!-- Overlays -->
+  <div class="overlay" id="blockedOverlay">
+    <div class="icon">🌷</div>
+    <h2>Эта страничка не для тебя</h2>
+    <p>Тут хранится кое-что личное. Если думаешь, что ссылка для тебя — попроси у того, кто её отправил, правильную.</p>
+  </div>
+
+  <div class="overlay" id="desktopOverlay">
+    <div class="icon">📱</div>
+    <h2>Открой это с телефона</h2>
+    <p>Эта страничка задумана для уютного открытия с твоего телефона ☕</p>
+  </div>
+
+  <div class="overlay" id="doneOverlay">
+    <div class="icon">🌙</div>
+    <h2>На сегодня всё, Вика</h2>
+    <p id="doneSub">Сегодняшнее уже прочитано. Возвращайся завтра утром — буду тебя ждать ✨</p>
+    <button class="cal-close" id="doneCal" style="margin-top:20px;">📖 посмотреть прошлые</button>
+  </div>
+
 <script>
-  // ---------- 10 wishes ----------
+(() => {
+  // ============ CONFIG ============
+  const SECRET_KEY = 'vika-7k3m9p2x';                // URL ?k=... must match
+  const NTFY_TOPIC = 'vika-mornings-9k3m7p2x4q8w5t'; // ntfy.sh topic
+  const WISH_DURATION_MS = 10000;                    // wish auto-close timer
+
+  // ============ 10 WISHES (warm, friendly, not intimate) ============
   const WISHES = [
-    "Пусть этот день начнётся с улыбки, а закончится мыслью о том, как сильно тебя любят. Ты — самое тёплое, что есть в моей жизни.",
-    "Сегодня ты особенно красивая. Впрочем, как и вчера. И как будешь завтра. Я тобой горжусь — просто за то, что ты есть.",
-    "Желаю тебе, чтобы каждая мелочь сегодня радовала: солнечный луч, любимый кофе, случайная мысль обо мне. Я рядом, даже если не вижу тебя сейчас.",
-    "Ты делаешь мир мягче. Пусть и мир сегодня будет к тебе мягким — без спешки, без тревог, только то, что согревает.",
-    "Помни: ты сильнее, чем думаешь, и любимее, чем чувствуешь. Я выбираю тебя каждый день заново — и это самое лёгкое решение.",
-    "Сегодня твой день — без причины, просто потому что ты в нём. Пусть он принесёт что-то маленькое, но настоящее. Я тебя обнимаю.",
-    "Знаешь, что мне сегодня хочется? Чтобы ты улыбнулась прямо сейчас. Получилось? Тогда мой план на день удался. Люблю тебя.",
-    "Ты — моя любимая мысль с утра и последняя перед сном. Пусть твой день будет таким же тёплым, какими ты делаешь мои.",
-    "Если устанешь — отдохни. Если загрустишь — вспомни, что я где-то думаю о тебе именно в эту секунду. Ты не одна. Никогда.",
-    "Десять дней пролетели, а я люблю тебя в десять раз сильнее. Спасибо, что ты есть. Спасибо, что выбрала меня. Я твой."
+    "Доброе утро, Вика. Пусть сегодняшний день начнётся с чего-то приятного — любимый кофе, вкусный завтрак, или просто тёплый солнечный луч в окне. Хорошего дня. 🌸",
+    "Привет, Вика. Знаешь, ты как-то незаметно делаешь людей вокруг улыбаться. Пусть и тебе сегодня улыбнётся что-то хорошее. ✨",
+    "Желаю лёгкого дня — без спешки и усталости. Найди время для себя, даже если это будет всего пять минут тишины. ☕",
+    "Вика, ты классная. Просто захотелось напомнить тебе об этом сегодня. Пусть день будет в твою пользу. 🌷",
+    "Если день не задаётся — помни, что у тебя всегда есть право поставить его на паузу, выпить чашку чая и начать заново. 🍃",
+    "Сегодня желаю маленьких радостей: вкусной еды, доброго слова, неожиданно хорошей новости. Из мелочей складывается большое. 🌼",
+    "Вика, ты умеешь видеть красоту в обычных вещах — это редкое качество. Пусть сегодня тебе встретится что-то по-настоящему красивое. 🌿",
+    "Пусть сегодня будет спокойный день. Иногда тихий день — самый ценный. ☁️",
+    "Доброе утро. Ты умная, сильная и интересная — справишься со всем, что задумала на сегодня. Удачи. 🌟",
+    "Десятый день. Спасибо, что заходила сюда каждое утро ✨ Надеюсь, эти маленькие записочки делали твои дни немного теплее. 🐞",
   ];
 
-  // ---------- Day index (cycles 1..10) ----------
-  // Anchor date = first day she opens the page (stored in localStorage)
+  // ============ ACCESS CONTROL ============
+  const params = new URLSearchParams(location.search);
+  const urlKey = params.get('k');
+  const devMode = params.get('dev') === '1';
+
+  if (urlKey !== SECRET_KEY) {
+    document.getElementById('blockedOverlay').classList.add('show');
+    sendPing('blocked-no-key');
+    return;
+  }
+
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                   || window.matchMedia('(pointer: coarse)').matches;
+  if (!isMobile && !devMode) {
+    document.getElementById('desktopOverlay').classList.add('show');
+    sendPing('blocked-desktop');
+    return;
+  }
+
+  // ============ NTFY TRACKING ============
+  function sendPing(event, extra = {}) {
+    try {
+      const info = {
+        event,
+        time: new Date().toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }),
+        device: navigator.userAgent.slice(0, 80),
+        screen: `${screen.width}x${screen.height}`,
+        ...extra,
+      };
+      const body = `🐞 ${event}\n${info.time}\n${info.device}\n${info.screen}`
+        + (extra.day ? `\nДЕНЬ ${extra.day}` : '');
+      fetch(`https://ntfy.sh/${NTFY_TOPIC}`, {
+        method: 'POST',
+        body,
+        headers: { 'Title': `Вика: ${event}`, 'Priority': '3', 'Tags': 'ladybug' },
+      }).catch(() => {});
+    } catch (e) {}
+  }
+
+  // ============ DAY / LOCK STATE ============
+  function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+
   function getDayNumber() {
-    const KEY = 'ladybug_start_date';
+    const KEY = 'lb_start_date';
     let start = localStorage.getItem(KEY);
     if (!start) {
       start = new Date().toDateString();
       localStorage.setItem(KEY, start);
     }
     const startMs = new Date(start).getTime();
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const diffDays = Math.floor((today.getTime() - startMs) / (1000*60*60*24));
-    return (diffDays % WISHES.length) + 1; // 1..10
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.floor((today.getTime() - startMs) / 86400000);
+    return (diff % WISHES.length) + 1;
   }
 
-  // ---------- Mark day as seen ----------
+  function isLockedToday() {
+    return localStorage.getItem('lb_last_open') === todayKey() && !devMode;
+  }
+  function lockToday() {
+    localStorage.setItem('lb_last_open', todayKey());
+  }
   function markSeen(day) {
-    const seen = JSON.parse(localStorage.getItem('ladybug_seen') || '[]');
+    const seen = JSON.parse(localStorage.getItem('lb_seen') || '[]');
     if (!seen.includes(day)) {
       seen.push(day);
-      localStorage.setItem('ladybug_seen', JSON.stringify(seen));
+      localStorage.setItem('lb_seen', JSON.stringify(seen));
     }
   }
 
-  // ---------- Audio: gentle buzzing via Web Audio API ----------
+  // ============ AUDIO ============
   let audioCtx = null;
   let buzzNodes = null;
-
   function initAudio() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-
-  function startBuzz() {
+  function startBuzz(volume = 0.04) {
     initAudio();
     if (buzzNodes) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     const lfo = audioCtx.createOscillator();
     const lfoGain = audioCtx.createGain();
-
     osc.type = 'sawtooth';
     osc.frequency.value = 180;
     gain.gain.value = 0;
-    gain.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 0.3);
-
-    lfo.frequency.value = 12;          // wing-beat tremolo
+    gain.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.3);
+    lfo.frequency.value = 12;
     lfoGain.gain.value = 0.025;
     lfo.connect(lfoGain).connect(gain.gain);
-
     osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    lfo.start();
+    osc.start(); lfo.start();
     buzzNodes = { osc, gain, lfo };
   }
-
   function stopBuzz() {
     if (!buzzNodes) return;
     const { osc, gain, lfo } = buzzNodes;
     gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
-    setTimeout(() => { osc.stop(); lfo.stop(); }, 350);
+    setTimeout(() => { try { osc.stop(); lfo.stop(); } catch(e){} }, 350);
     buzzNodes = null;
   }
-
   function kissSound() {
     initAudio();
     const osc = audioCtx.createOscillator();
@@ -492,37 +488,37 @@
     osc.type = 'sine';
     osc.frequency.setValueAtTime(800, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
     osc.connect(gain).connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
   }
 
-  // ---------- Ladybug flight ----------
+  // ============ DOM REFS ============
   const ladybug = document.getElementById('ladybug');
   const palm = document.getElementById('palm');
-  let flying = false;
-  let landed = false;
-  let leaving = false;
+  const hintRing = document.getElementById('hintRing');
+  const wishCard = document.getElementById('wishCard');
+  const wishText = document.getElementById('wishText');
+  const dayBadge = document.getElementById('dayBadge');
+  const countdownEl = document.getElementById('countdown');
+  const kissHeart = document.getElementById('kissHeart');
+  const toast = document.getElementById('toast');
+  const greetSub = document.getElementById('greetSub');
+
+  let busy = false;       // animation in progress
+  let countdownTimer = null;
+  let autoCloseTimer = null;
+
+  function setPos(x, y, rotation = 0) {
+    ladybug.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+  }
 
   function getPalmCenter() {
     const r = palm.getBoundingClientRect();
-    return { x: r.left + r.width/2 - 30, y: r.top + r.height/2 - 30 };
+    return { x: r.left + r.width/2 - 28, y: r.top + r.height/2 - 28 };
   }
 
-  function getStartPos() {
-    // Enter from one of the corners randomly
-    const corners = [
-      { x: -80, y: window.innerHeight * 0.2 },
-      { x: window.innerWidth + 30, y: window.innerHeight * 0.3 },
-      { x: -80, y: window.innerHeight * 0.7 },
-      { x: window.innerWidth + 30, y: window.innerHeight * 0.6 },
-    ];
-    return corners[Math.floor(Math.random() * corners.length)];
-  }
-
-  // Bezier interpolation for curved flight
   function bezier(t, p0, p1, p2) {
     const u = 1 - t;
     return {
@@ -531,125 +527,231 @@
     };
   }
 
-  function animateFlight(from, to, duration, onDone) {
-    // Control point: somewhere above midpoint for graceful arc
-    const mid = {
-      x: (from.x + to.x) / 2 + (Math.random() - 0.5) * 200,
-      y: Math.min(from.y, to.y) - 120 - Math.random() * 80,
-    };
-    const start = performance.now();
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
 
-    function frame(now) {
-      const t = Math.min(1, (now - start) / duration);
-      // ease in-out
-      const e = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2;
-      const pos = bezier(e, from, mid, to);
-      // tangent for rotation
-      const ahead = bezier(Math.min(1, e + 0.02), from, mid, to);
-      const angle = Math.atan2(ahead.y - pos.y, ahead.x - pos.x) * 180 / Math.PI + 90;
-      // small bobbing
-      const bob = Math.sin(now * 0.02) * 4;
-      ladybug.style.transform = `translate(${pos.x}px, ${pos.y + bob}px) rotate(${angle}deg)`;
-      if (t < 1) requestAnimationFrame(frame);
-      else onDone && onDone();
-    }
-    requestAnimationFrame(frame);
-  }
-
-  function flyIn() {
-    if (flying || landed) return;
-    flying = true;
-    const from = getStartPos();
-    const to = getPalmCenter();
-    ladybug.style.transform = `translate(${from.x}px, ${from.y}px)`;
-    ladybug.classList.add('visible');
-    ladybug.classList.remove('landed');
-    startBuzz();
-    animateFlight(from, to, 1800, () => {
-      flying = false;
-      landed = true;
-      ladybug.classList.add('landed');
-      stopBuzz();
-      // settle position cleanly
-      ladybug.style.transform = `translate(${to.x}px, ${to.y}px) rotate(0deg)`;
+  // Animate flying along curved path
+  function flyTo(from, to, duration) {
+    return new Promise(resolve => {
+      const mid = {
+        x: (from.x + to.x) / 2 + (Math.random() - 0.5) * 200,
+        y: Math.min(from.y, to.y) - 80 - Math.random() * 60,
+      };
+      const start = performance.now();
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const e = easeInOut(t);
+        const pos = bezier(e, from, mid, to);
+        const ahead = bezier(Math.min(1, e + 0.02), from, mid, to);
+        const angle = Math.atan2(ahead.y - pos.y, ahead.x - pos.x) * 180 / Math.PI + 90;
+        const bob = Math.sin(now * 0.02) * 3;
+        setPos(pos.x, pos.y + bob, angle);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
     });
   }
 
-  function flyAway() {
-    if (!landed || leaving) return;
-    leaving = true;
-    landed = false;
-    ladybug.classList.remove('landed');
-    const from = getPalmCenter();
-    // exit upward toward random corner
-    const to = {
-      x: Math.random() < 0.5 ? -100 : window.innerWidth + 50,
-      y: -120 - Math.random() * 100,
-    };
-    startBuzz();
-    animateFlight(from, to, 1600, () => {
-      ladybug.classList.remove('visible');
-      stopBuzz();
-      leaving = false;
+  // Slow crawl across screen with gentle zigzag
+  function crawlTo(from, to, duration) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      const dx = to.x - from.x, dy = to.y - from.y;
+      function frame(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const e = easeInOut(t);
+        // base position
+        let x = from.x + dx * e;
+        let y = from.y + dy * e;
+        // perpendicular zigzag
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len, ny = dx / len;
+        const wiggle = Math.sin(t * Math.PI * 4) * 14;
+        x += nx * wiggle; y += ny * wiggle;
+        // angle along path with slight wobble
+        const baseAngle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+        const wobble = Math.sin(now * 0.012) * 4;
+        setPos(x, y, baseAngle + wobble);
+        if (t < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
     });
   }
 
-  // ---------- Hearts burst ----------
-  function burstHearts(x, y) {
-    const symbols = ['💗','❤️','💕','💖','✨'];
-    for (let i = 0; i < 8; i++) {
-      const h = document.createElement('div');
-      h.className = 'heart';
-      h.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-      h.style.left = x + 'px';
-      h.style.top = y + 'px';
-      h.style.setProperty('--dx', ((Math.random() - 0.5) * 200) + 'px');
-      h.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
-      document.body.appendChild(h);
-      setTimeout(() => h.remove(), 2200);
-    }
+  // Hold position for ms (with subtle breathing)
+  function hold(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  // ---------- Show wish ----------
-  const wishCard = document.getElementById('wishCard');
-  const wishText = document.getElementById('wishText');
-  const dayBadge = document.getElementById('dayBadge');
+  // Wink + send heart
+  async function greetingDance(pos) {
+    // face down (look at viewer)
+    setPos(pos.x, pos.y, 0);
+    await hold(300);
+    // wink
+    ladybug.classList.add('winking');
+    await hold(220);
+    ladybug.classList.remove('winking');
+    await hold(150);
+    ladybug.classList.add('winking');
+    await hold(220);
+    ladybug.classList.remove('winking');
+    await hold(200);
+    // send a little heart
+    kissHeart.style.left = (pos.x + 28) + 'px';
+    kissHeart.style.top  = (pos.y + 5) + 'px';
+    kissHeart.classList.remove('fly');
+    void kissHeart.offsetWidth;
+    kissHeart.classList.add('fly');
+    kissSound();
+    await hold(900);
+  }
 
-  function showWish() {
+  function getStartCorner() {
+    const corners = [
+      { x: -80, y: window.innerHeight * 0.2 },
+      { x: window.innerWidth + 30, y: window.innerHeight * 0.25 },
+      { x: -80, y: window.innerHeight * 0.65 },
+      { x: window.innerWidth + 30, y: window.innerHeight * 0.6 },
+    ];
+    return corners[Math.floor(Math.random() * corners.length)];
+  }
+
+  // Random point in central screen for crawling start
+  function getCrawlStart() {
+    const w = window.innerWidth, h = window.innerHeight;
+    return {
+      x: w * (0.25 + Math.random() * 0.5) - 28,
+      y: h * (0.20 + Math.random() * 0.15) - 28,
+    };
+  }
+
+  function getCrawlEnd() {
+    // somewhere above the palm
+    const palmC = getPalmCenter();
+    return { x: palmC.x + (Math.random() - 0.5) * 60, y: palmC.y - 100 };
+  }
+
+  // ============ FULL SEQUENCE ============
+  async function runSequence() {
+    if (busy || isLockedToday()) return;
+    busy = true;
+    hintRing.classList.add('hidden');
+    palm.classList.add('active');
+
+    ladybug.classList.add('visible', 'flying');
+
+    // 1. Fly in from corner to crawl start point
+    const corner = getStartCorner();
+    const crawlStart = getCrawlStart();
+    setPos(corner.x, corner.y);
+    startBuzz();
+    await flyTo(corner, crawlStart, 1300);
+
+    // 2. Land on "lens" — settle, switch to crawling
+    stopBuzz();
+    ladybug.classList.remove('flying');
+    ladybug.classList.add('crawling', 'on-glass');
+    await hold(400);
+
+    // 3. Crawl across the screen (curved path via segments)
+    const crawlMid = {
+      x: (crawlStart.x + getCrawlEnd().x) / 2 + (Math.random() - 0.5) * 200,
+      y: crawlStart.y + 80 + Math.random() * 40,
+    };
+    await crawlTo(crawlStart, crawlMid, 1700);
+    await hold(250);
+
+    // 4. Greeting dance: wink + send heart
+    await greetingDance(crawlMid);
+
+    // 5. Continue crawling toward palm area
+    const crawlEnd = getCrawlEnd();
+    await crawlTo(crawlMid, crawlEnd, 1200);
+
+    // 6. Take off and land on palm
+    ladybug.classList.remove('crawling', 'on-glass');
+    ladybug.classList.add('flying');
+    startBuzz(0.03);
+    const palmC = getPalmCenter();
+    await flyTo(crawlEnd, palmC, 900);
+    stopBuzz();
+    ladybug.classList.remove('flying');
+    setPos(palmC.x, palmC.y, 0);
+
+    // 7. Show wish
     const day = getDayNumber();
+    showWish(day);
+    markSeen(day);
+    sendPing('wish-shown', { day });
+
+    // 8. Wait WISH_DURATION_MS, then close + fly away
+    startCountdown(WISH_DURATION_MS);
+    autoCloseTimer = setTimeout(async () => {
+      hideWish();
+      await hold(400);
+      // fly away
+      ladybug.classList.add('flying');
+      startBuzz();
+      const exit = {
+        x: Math.random() < 0.5 ? -100 : window.innerWidth + 50,
+        y: -120 - Math.random() * 80,
+      };
+      await flyTo(palmC, exit, 1400);
+      stopBuzz();
+      ladybug.classList.remove('visible', 'flying');
+      // Lock for today
+      lockToday();
+      showToast('Хорошего дня, Вика 🌷', 2500);
+      await hold(2700);
+      // Show "see you tomorrow" overlay
+      showDoneOverlay();
+      busy = false;
+    }, WISH_DURATION_MS);
+  }
+
+  function showWish(day) {
     wishText.textContent = WISHES[day - 1];
     dayBadge.textContent = `ДЕНЬ ${day}`;
     wishCard.classList.add('show');
-    markSeen(day);
+  }
+  function hideWish() {
+    wishCard.classList.remove('show');
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+  }
+  function startCountdown(totalMs) {
+    let left = Math.ceil(totalMs / 1000);
+    countdownEl.textContent = `закроется через ${left}…`;
+    countdownTimer = setInterval(() => {
+      left--;
+      if (left <= 0) {
+        countdownEl.textContent = '';
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+      } else {
+        countdownEl.textContent = `закроется через ${left}…`;
+      }
+    }, 1000);
+  }
+  function showToast(text, ms) {
+    toast.textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), ms);
+  }
+  function showDoneOverlay() {
+    document.getElementById('doneOverlay').classList.add('show');
   }
 
-  document.getElementById('closeWish').addEventListener('click', () => {
-    wishCard.classList.remove('show');
-  });
-
-  // ---------- Events ----------
-  palm.addEventListener('mouseenter', flyIn);
-  palm.addEventListener('touchstart', flyIn, { passive: true });
-
-  ladybug.addEventListener('click', (e) => {
-    if (!landed) return;
-    const rect = ladybug.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    burstHearts(cx, cy);
-    kissSound();
-    showWish();
-    setTimeout(flyAway, 600);
-  });
-
-  // ---------- Calendar ----------
+  // ============ CALENDAR ============
   const calBtn = document.getElementById('calBtn');
   const calModal = document.getElementById('calModal');
   const calList = document.getElementById('calList');
   const calClose = document.getElementById('calClose');
+  const doneCal = document.getElementById('doneCal');
 
-  calBtn.addEventListener('click', () => {
-    const seen = JSON.parse(localStorage.getItem('ladybug_seen') || '[]');
+  function openCalendar() {
+    const seen = JSON.parse(localStorage.getItem('lb_seen') || '[]');
     const today = getDayNumber();
     calList.innerHTML = '';
     WISHES.forEach((wish, i) => {
@@ -664,16 +766,42 @@
       calList.appendChild(div);
     });
     calModal.classList.add('show');
-  });
-
+  }
+  calBtn.addEventListener('click', openCalendar);
+  doneCal.addEventListener('click', openCalendar);
   calClose.addEventListener('click', () => calModal.classList.remove('show'));
   calModal.addEventListener('click', (e) => {
     if (e.target === calModal) calModal.classList.remove('show');
   });
 
-  // Pre-init audio on first user interaction (browsers require this)
+  // ============ INIT ============
+  function init() {
+    sendPing('page-open', { day: getDayNumber() });
+
+    if (isLockedToday()) {
+      // already opened today
+      hintRing.classList.add('hidden');
+      greetSub.textContent = 'на сегодня уже всё — увидимся завтра 🌙';
+      showDoneOverlay();
+      return;
+    }
+
+    palm.addEventListener('click', () => {
+      initAudio();
+      runSequence();
+    });
+    palm.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      initAudio();
+      runSequence();
+    }, { passive: false });
+  }
+
   document.addEventListener('click', initAudio, { once: true });
   document.addEventListener('touchstart', initAudio, { once: true });
+
+  init();
+})();
 </script>
 </body>
 </html>
