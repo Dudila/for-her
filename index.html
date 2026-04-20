@@ -694,15 +694,8 @@
     return;
   }
 
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-                   || window.matchMedia('(pointer: coarse)').matches;
-  if (!isMobile && !devMode) {
-    document.getElementById('desktopOverlay').classList.add('show');
-    sendPing('blocked-desktop');
-    return;
-  }
-
   // Пауза: показываем заглушку, пока сегодняшний день <= MAINTENANCE_UNTIL.
+  // Проверка ДО детекта мобилки — чтобы с десктопа тоже была видна заглушка.
   // dev=1 эту паузу игнорит, чтобы можно было проверить верстку.
   if (MAINTENANCE_UNTIL && !devMode) {
     const _d = new Date();
@@ -712,6 +705,14 @@
       sendPing('maintenance', { until: MAINTENANCE_UNTIL });
       return;
     }
+  }
+
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+                   || window.matchMedia('(pointer: coarse)').matches;
+  if (!isMobile && !devMode) {
+    document.getElementById('desktopOverlay').classList.add('show');
+    sendPing('blocked-desktop');
+    return;
   }
 
   // ============ NTFY TRACKING ============
