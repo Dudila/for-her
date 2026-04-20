@@ -652,12 +652,22 @@
     <button class="cal-close" id="doneCal" style="margin-top:24px;">📖 посмотреть прошлые</button>
   </div>
 
+  <div class="overlay" id="maintenanceOverlay">
+    <div class="icon">🌸</div>
+    <h2>Эта страница пока недоступна</h2>
+    <p>Загляни сюда завтра утром ☀️</p>
+  </div>
+
 <script>
 (() => {
   // ============ CONFIG ============
   const SECRET_KEY = 'vika-7k3m9p2x';
   const NTFY_TOPIC = 'vika-mornings-9k3m7p2x4q8w5t';
   const WISH_DURATION_MS = 10000;
+
+  // Если сегодняшняя дата <= MAINTENANCE_UNTIL — показываем заглушку.
+  // Чтобы снять паузу: поставь вчерашнюю дату или пустую строку ''.
+  const MAINTENANCE_UNTIL = '2026-04-20';
 
   // ============ 10 WISHES — short, simple, with soul ============
   const WISHES = [
@@ -690,6 +700,18 @@
     document.getElementById('desktopOverlay').classList.add('show');
     sendPing('blocked-desktop');
     return;
+  }
+
+  // Пауза: показываем заглушку, пока сегодняшний день <= MAINTENANCE_UNTIL.
+  // dev=1 эту паузу игнорит, чтобы можно было проверить верстку.
+  if (MAINTENANCE_UNTIL && !devMode) {
+    const _d = new Date();
+    const _today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+    if (_today <= MAINTENANCE_UNTIL) {
+      document.getElementById('maintenanceOverlay').classList.add('show');
+      sendPing('maintenance', { until: MAINTENANCE_UNTIL });
+      return;
+    }
   }
 
   // ============ NTFY TRACKING ============
